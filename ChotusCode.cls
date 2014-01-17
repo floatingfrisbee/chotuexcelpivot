@@ -27,9 +27,11 @@ Private Type pivotInfo
     dataSheetName As String
     tables(100) As pivotTableInfo
 End Type
+
 Function IsInArray(arr() As String, stringToBeFound As String) As Boolean
   IsInArray = (UBound(filter(arr, stringToBeFound)) > -1)
 End Function
+
 Function SheetExists(shtName As String, Optional wb As Workbook) As Boolean
     Dim sht As Worksheet
     If wb Is Nothing Then Set wb = ActiveWorkbook
@@ -38,6 +40,7 @@ Function SheetExists(shtName As String, Optional wb As Workbook) As Boolean
     On Error GoTo 0
     SheetExists = Not sht Is Nothing
 End Function
+
 Function PivotTableExists(tableName As String, sheet As Worksheet) As Boolean
     Dim table As PivotTable
     On Error Resume Next
@@ -45,6 +48,7 @@ Function PivotTableExists(tableName As String, sheet As Worksheet) As Boolean
     On Error GoTo 0
     PivotTableExists = Not table Is Nothing
 End Function
+
 ' This cleans all auto generated sheets. That is sheets that end with "AutoGen"
 Public Sub CleanWorkbook()
     
@@ -59,6 +63,7 @@ Public Sub CleanWorkbook()
     Application.DisplayAlerts = True
     
 End Sub
+
 Public Sub Test()
     
     Dim filter As filterInfo
@@ -92,6 +97,7 @@ printError:
     End If
     
 End Sub
+
 ' This is the function that should be run to generate
 ' the pivot tables.
 Public Sub Main()
@@ -366,6 +372,7 @@ printError:
     End If
     
 End Sub
+
 Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
 
 
