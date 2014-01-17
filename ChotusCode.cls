@@ -1,13 +1,12 @@
-'VERSION 1.0 CLASS
-'BEGIN
-'  MultiUse = -1  'True
-'END
-'Attribute VB_Name = "Sheet1"
-'Attribute VB_GlobalNameSpace = False
-'Attribute VB_Creatable = False
-'Attribute VB_PredeclaredId = True
-'Attribute VB_Exposed = True
-
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "Sheet1"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
 Private Type filterInfo
     columnName As String
     values(5) As String
@@ -373,6 +372,189 @@ printError:
     
 End Sub
 
+Private Function ParseFilter(filterString As String) As filterInfo()
+    
+    Dim filters(5) As filterInfo
+    
+    Dim filterStrings() As String
+    filterStrings = Split(filterString, ",")
+    
+    Dim filterCount
+    filterCount = 0
+    
+    Dim fs As String
+    
+    For Each fs In filterStrings
+    
+        If filterCount = UBound(fs) Then
+            Exit For
+        End If
+        
+        Dim nameValue() As String
+        nameValue = Split(Trim(fs), ":")
+        
+        filters(filterCount).columnName = Trim(nameValue(0))
+        
+        Dim values() As String
+        values = Split(nameValue(1), "/")
+        
+        Dim valueCount
+        valueCount = 0
+        
+        For Each filterValue In values
+    
+            If valueCount = UBound(filters(filterCount).values) Then
+                Exit For
+            End If
+        
+            filters(filterCount).values(valueCount) = Trim(filterValue)
+            
+            valueCount = valueCount + 1
+            
+        End
+        
+        filterCount = filterCount + 1
+        
+    Next filter
+    
+    ParseFilter = filters
+    
+End Function
+
+Private Function ParseLine(line As String) As pivotTableInfo
+    
+    Dim elements() As String
+    elements = Split(line, "|")
+
+    Dim pt As pivotTableInfo
+    
+    pt.sheetName = Trim(elements(0))
+    pt.tableName = Trim(elements(1))
+    pt.dataField = Trim(elements(2))
+    
+    Dim columns() As String
+    columns = Split(elements(3), ",")
+    
+    Dim count
+    
+    count = 0
+    
+    For Each col In columns
+        If count > UBound(pt.columnFields) Then
+            Exit For
+        End If
+        pt.columnFields(count) = Trim(col)
+        count = count + 1
+    Next col
+    
+    Dim rows() As String
+    rows = Split(elements(4), ",")
+    
+    count = 0
+    
+    For Each rowField In rows
+        If count > UBound(pt.rowFields) Then
+            Exit For
+        End If
+        pt.rowFields(count) = Trim(rowField)
+        count = count + 1
+    Next rowField
+    
+    Dim j() As filterInfo
+    j = ParseFilter(elements(5))
+    
+    ParseLine = pt
+    
+End Function
+
+Private Function ReadInputFile(fullFilePath As String) As pivotTableInfo()
+    
+    Dim tables(100) As pivotTableInfo
+    Dim iFileNum As Integer
+    Dim line As String
+
+    If Len(Dir$(fullFilePath)) = 0 Then
+        MsgBox fullFilePath & " does not exist"
+        Exit Function
+    End If
+
+    iFileNum = FreeFile()
+    Open fullFilePath For Input As iFileNum
+
+    Dim count
+    
+    count = 1
+    
+    Do While Not EOF(iFileNum)
+        Line Input #iFileNum, line
+        tables(count) = ParseLine(line)
+        count = count + 1
+    Loop
+
+    ' close the file
+    Close iFileNum
+
+End Function
+
+Private Sub TestFileRead()
+    
+    Dim filePath As String
+    filePath = "C:\Users\me\jbakshi\Chotu\Misc\MakingPlotsInExcel\data.txt"
+    
+    Dim tables() As pivotTableInfo
+    
+    tables = ReadInputFile(filePath)
+    
+End Sub
+
+Private Sub Serialize(pi As pivotInfo)
+    Dim fullFilePath
+    fullFilePath = "C:\Users\me\jbakshi\Chotu\Misc\MakingPlotsInExcel\inputdata.txt"
+    
+    Dim fso As Object
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Dim oFile As Object
+    Set oFile = fso.CreateTextFile(fullFilePath)
+    
+    For i = 0 To UBound(pi.tables)
+        If Not pi.tables(i).sheetName = "" Then
+            Dim pt As pivotTableInfo
+            
+            Set pt = pi.tables(i)
+            
+            Dim first
+            Dim number
+            Dim columnString
+            first = True
+            
+            For Each c In pt.columnFields
+                If Not first Then
+                    columnString = columnString & ", "
+                Else
+                    first = False
+                End If
+                
+                columnString = columnString & c
+            Next table
+        
+            Dim outputString
+            
+            outputString = pt.sheetName & " | " & _
+                            pt.tableName & " | " & _
+                            pt.dataField & " | "
+                            
+        Else
+            Exit For
+        End If
+    Next i
+    
+    oFile.Close
+    
+    Set fso = Nothing
+    Set oFile = Nothing
+
+End Sub
+
 Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
 
 
@@ -465,14 +647,19 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
     'Add filter
     For i = 0 To UBound(pt.filters)
         If Not pt.filters(i).columnName = "" Then
+            ' Add the column as a pivot field of type "xlPageField"
             With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
                 .Orientation = xlPageField
                 .Position = posCounter
                 .EnableMultiplePageItems = True
             End With
+            posCounter = posCounter + 1
+            
             Dim filterColumn
             Set filterColumn = ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
-            posCounter = posCounter + 1
+            
+            ' Now turn on the values that are specified. Turn off
+            ' other values
             For Each pItem In filterColumn.PivotItems
                 If IsInArray(pt.filters(i).values, pItem.Name) Then
                     pItem.Visible = True
@@ -486,3 +673,4 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
     Next i
 
 End Sub
+
