@@ -58,15 +58,20 @@ Public Sub CleanWorkbook()
 End Sub
 Public Sub Test()
     
-    Dim codTable As pivotTableInfo
-    codTable.sheetName = "COD"
-    codTable.tableName = "COD Table"
-    codTable.dataField = "CauseOfDeathType"
-    codTable.columnFields(0) = "year"
+    Dim filter As filterInfo
+    filter.columnName = "Outcome_Outcome"
+    filter.values(0) = "Family Decline"
+    
+    Dim ncreasonTable As pivotTableInfo
+    ncreasonTable.sheetName = "FDs - Reason NC"
+    ncreasonTable.tableName = "FDs - Reason NC Table"
+    ncreasonTable.dataField = "Reason_NC"
+    ncreasonTable.columnFields(0) = "year"
+    ncreasonTable.filters(0) = filter
     
     Dim pi As pivotInfo
     pi.dataSheetName = "CLEAN_REFERRALS"
-    pi.tables(0) = codTable
+    pi.tables(0) = ncreasonTable
     
     On Error GoTo printError
     
@@ -101,7 +106,7 @@ Public Sub Main()
     donationTable.columnFields(0) = "year"
     
     Dim filter As filterInfo
-    filter.columnName = "outcome_outcome"
+    filter.columnName = "Outcome_Outcome"
     filter.values(0) = "Family Decline"
     
     Dim ncreasonTable As pivotTableInfo
@@ -391,25 +396,6 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
     pCache.CreatePivotTable TableDestination:=sheetToUse.Range("A1"), _
     tableName:=pt.tableName, DefaultVersion:=xlPivotTableVersion10
     
-    Dim posCounter
-    
-    posCounter = 1
-    
-    'Add filter
-    'For i = 0 To UBound(pt.filters)
-    '    For j = 0 To UBound(pt.filters(i).values)
-    '        If Not pt.filters(i).values(j) = "" Then
-    '            With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).values(j))
-    '                .Orientation = xlPageField
-    '                .Position = posCounter
-    '            End With
-    '            posCounter = posCounter + 1
-    '        Else
-    '            Exit For
-    '        End If
-    '    Next j
-    'Next i
-    
     ' Add column fields
     With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.columnFields(0))
         .Orientation = xlColumnField
@@ -436,6 +422,8 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
         .NumberFormat = "0%"
     End With
     
+    Dim posCounter
+    
     posCounter = 1
     
     ' For each row field specified in the pivot table's
@@ -457,5 +445,22 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
         .Orientation = xlRowField
         .Position = posCounter
     End With
+    
+    posCounter = 1
+        
+    'Add filter
+    For i = 0 To UBound(pt.filters)
+        For j = 0 To UBound(pt.filters(i).values)
+            If Not pt.filters(i).values(j) = "" Then
+                With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
+                    .Orientation = xlPageField
+                    .Position = posCounter
+                End With
+                posCounter = posCounter + 1
+            Else
+                Exit For
+            End If
+        Next j
+    Next i
 
 End Sub
