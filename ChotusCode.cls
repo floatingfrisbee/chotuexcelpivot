@@ -110,6 +110,8 @@ Public Sub Main()
     Dim filter As filterInfo
     filter.columnName = "Outcome_Outcome"
     filter.values(0) = "Family Decline"
+    filter.values(1) = "Donor"
+    filter.values(2) = "CNR"
     
     Dim ncreasonTable As pivotTableInfo
     ncreasonTable.sheetName = "FDs - Reason NC"
@@ -341,6 +343,8 @@ Public Sub Main()
     ' pivotInfo.tables(0).columnFields(0) = "year"
     
     On Error GoTo printError
+    
+    CleanWorkbook
     
     For i = 0 To UBound(pi.tables)
         On Error GoTo failedPivot
