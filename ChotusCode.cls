@@ -26,7 +26,9 @@ Private Type pivotInfo
     dataSheetName As String
     tables(100) As pivotTableInfo
 End Type
-
+Function IsInArray(stringToBeFound As String, arr As Variant) As Boolean
+  IsInArray = (UBound(filter(arr, stringToBeFound)) > -1)
+End Function
 Function SheetExists(shtName As String, Optional wb As Workbook) As Boolean
     Dim sht As Worksheet
     If wb Is Nothing Then Set wb = ActiveWorkbook
@@ -450,17 +452,25 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
         
     'Add filter
     For i = 0 To UBound(pt.filters)
-        For j = 0 To UBound(pt.filters(i).values)
-            If Not pt.filters(i).values(j) = "" Then
-                With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
-                    .Orientation = xlPageField
-                    .Position = posCounter
-                End With
-                posCounter = posCounter + 1
-            Else
-                Exit For
-            End If
-        Next j
+        If Not pt.filters(i).columnName = "" Then
+            With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
+                .Orientation = xlPageField
+                .Position = posCounter
+                .EnableMultiplePageItems = True
+            End With
+            Dim filterColumn
+            Set filterColumn = ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.filters(i).columnName)
+            posCounter = posCounter + 1
+            For j = 0 To UBound(pt.filters(i).values)
+                If Not pt.filters(i).values(j) = "" Then
+                    filterColumn.PivotItems(pt.filters(i).values(j)).Visible = True
+                Else
+                    Exit For
+                End If
+            Next j
+        Else
+            Exit For
+        End If
     Next i
 
 End Sub
