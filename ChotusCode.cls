@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
+Private Const SheetNameSuffix = "AG"
+
 Private Type filterInfo
     columnName As String
     values(5) As String
@@ -54,7 +56,7 @@ Public Sub CleanWorkbook()
     Application.DisplayAlerts = False
     
     For Each sheet In Sheets
-        If sheet.Name Like "*AutoGen" Then
+        If sheet.Name Like "* " & SheetNameSuffix Then
             sheet.Delete
         End If
     Next sheet
@@ -101,25 +103,25 @@ End Sub
 ' the pivot tables.
 Public Sub Main()
     
-    Dim consentTable As pivotTableInfo
+    Static consentTable As pivotTableInfo
     consentTable.sheetName = "NYODN Consent Rates"
     consentTable.tableName = "NYODN Consent Table"
     consentTable.dataField = "nyodn_consent"
     consentTable.columnFields(0) = "year"
     
-    Dim donationTable As pivotTableInfo
+    Static donationTable As pivotTableInfo
     donationTable.sheetName = "CMS Donation Rates"
     donationTable.tableName = "CMS Donation Table"
     donationTable.dataField = "cms_donation"
     donationTable.columnFields(0) = "year"
     
-    Dim filter As filterInfo
+    Static filter As filterInfo
     filter.columnName = "Outcome_Outcome"
     filter.values(0) = "Family Decline"
     filter.values(1) = "Donor"
     filter.values(2) = "CNR"
     
-    Dim ncreasonTable As pivotTableInfo
+    Static ncreasonTable As pivotTableInfo
     ncreasonTable.sheetName = "FDs - Reason NC"
     ncreasonTable.tableName = "FDs - Reason NC Table"
     ncreasonTable.dataField = "Reason_NC"
@@ -130,7 +132,7 @@ Public Sub Main()
     'ncreasonTable.filters(0).columnName = "outcome_outcome"
     'ncreasonTable.filters(0).value(0) = "Family Decline"
     
-    Dim ncreasonByTeamTable As pivotTableInfo
+    Static ncreasonByTeamTable As pivotTableInfo
     ncreasonByTeamTable.sheetName = "FDs - NC Reason by Team"
     ncreasonByTeamTable.tableName = "FDs - NC Reason by Team Table"
     ncreasonByTeamTable.dataField = "Reason_NC"
@@ -138,13 +140,13 @@ Public Sub Main()
     ncreasonByTeamTable.columnFields(0) = "year"
     ncreasonByTeamTable.filters(0) = filter
         
-    Dim outcomeTable As pivotTableInfo
+    Static outcomeTable As pivotTableInfo
     outcomeTable.sheetName = "Outcome"
     outcomeTable.tableName = "Outcome Table"
     outcomeTable.dataField = "Outcome_Outcome"
     outcomeTable.columnFields(0) = "year"
     
-    Dim msrTable As pivotTableInfo
+    Static msrTable As pivotTableInfo
     msrTable.sheetName = "MSR"
     msrTable.tableName = "MSR Table"
     msrTable.dataField = "msr"
@@ -304,7 +306,7 @@ Public Sub Main()
     donationRaceByTeamTable.rowFields(1) = "R"
     donationRaceByTeamTable.columnFields(0) = "year"
     
-    Dim donationAgeByTeamTable As pivotTableInfo
+        Dim donationAgeByTeamTable As pivotTableInfo
     donationAgeByTeamTable.sheetName = "CMS Donation by Team and Age"
     donationAgeByTeamTable.tableName = "CMS Donation by Team and Age Table"
     donationAgeByTeamTable.dataField = "cms_donation"
@@ -328,6 +330,122 @@ Public Sub Main()
     donationCODByTeamTable.rowFields(1) = "CauseOfDeathType"
     donationCODByTeamTable.columnFields(0) = "year"
     
+    Dim consentCODTable As pivotTableInfo
+    consentCODTable.sheetName = "NYODN Consent by COD"
+    consentCODTable.tableName = "NYODN Consent by COD Table"
+    consentCODTable.dataField = "nyodn_consent"
+    consentCODTable.rowFields(0) = "CauseOfDeathType"
+    consentCODTable.columnFields(0) = "year"
+    
+    Dim donationCODTable As pivotTableInfo
+    donationCODTable.sheetName = "CMS Donation by OD"
+    donationCODTable.tableName = "CMS Donation by COD Table"
+    donationCODTable.dataField = "cms_donation"
+    donationCODTable.rowFields(0) = "CauseOfDeathType"
+    donationCODTable.columnFields(0) = "year"
+    
+    Dim CMSEligTable As pivotTableInfo
+    CMSEligTable.sheetName = "CMS Eligible"
+    CMSEligTable.tableName = "CMS Eligible Table"
+    CMSEligTable.dataField = "CmsEligible"
+    CMSEligTable.columnFields(0) = "year"
+    
+    Dim consentCMSEligTable As pivotTableInfo
+    consentCMSEligTable.sheetName = "CMS Eligible Consent"
+    consentCMSEligTable.tableName = "CMS Eligible Consent Table"
+    consentCMSEligTable.dataField = "nyodn_consent"
+    consentCMSEligTable.rowFields(0) = "CmsEligible"
+    consentCMSEligTable.columnFields(0) = "year"
+    
+    Dim consentCMSEligByTeamTable As pivotTableInfo
+    consentCMSEligByTeamTable.sheetName = "CMS Eligible Consent by Team"
+    consentCMSEligByTeamTable.tableName = "CMS Eligible Consent by Team Table"
+    consentCMSEligByTeamTable.dataField = "nyodn_consent"
+    consentCMSEligByTeamTable.rowFields(0) = "Team"
+    consentCMSEligByTeamTable.rowFields(1) = "CmsEligible"
+    consentCMSEligByTeamTable.columnFields(0) = "year"
+    
+    Dim donationCMSEligTable As pivotTableInfo
+    donationCMSEligTable.sheetName = "CMS Eligible Donation"
+    donationCMSEligTable.tableName = "CMS Eligible Donation Table"
+    donationCMSEligTable.dataField = "cms_donation"
+    donationCMSEligTable.rowFields(0) = "CmsEligible"
+    donationCMSEligTable.columnFields(0) = "year"
+    
+    Dim donationCMSEligByTeamTable As pivotTableInfo
+    donationCMSEligByTeamTable.sheetName = "CMS Eligible Donation by Team"
+    donationCMSEligByTeamTable.tableName = "CMS Eligible Donation by Team Table"
+    donationCMSEligByTeamTable.dataField = "cms_donation"
+    donationCMSEligByTeamTable.rowFields(0) = "Team"
+    donationCMSEligByTeamTable.rowFields(1) = "CmsEligible"
+    donationCMSEligByTeamTable.columnFields(0) = "year"
+    
+    Dim DonorsQtrByTeamTable As pivotTableInfo
+    DonorsQtrByTeamTable.sheetName = "Donors by Qtr and Team"
+    DonorsQtrByTeamTable.tableName = "Donors by Qtr and Team Table"
+    DonorsQtrByTeamTable.dataField = "Team"
+    DonorsQtrByTeamTable.columnFields(0) = "qtr"
+    DonorsQtrByTeamTable.filters(0).columnName = "Outcome_Outcome"
+    DonorsQtrByTeamTable.filters(0).values(0) = "Donor"
+    
+    Dim DonorTypeTable As pivotTableInfo
+    DonorTypeTable.sheetName = "Donors by Type"
+    DonorTypeTable.tableName = "Donors by Type Table"
+    DonorTypeTable.dataField = "Outcome_Outcome"
+    DonorTypeTable.columnFields(0) = "year"
+    DonorTypeTable.columnFields(1) = "Outcome_Detail"
+    DonorTypeTable.filters(0).columnName = "Outcome_Outcome"
+    DonorTypeTable.filters(0).values(0) = "Donor"
+    
+    Dim EligDonorsFDsTable As pivotTableInfo
+    EligDonorsFDsTable.sheetName = "Elig Donors and FDs"
+    EligDonorsFDsTable.tableName = "Elig Donors and FDs Table"
+    EligDonorsFDsTable.dataField = "Outcome_Outcome"
+    EligDonorsFDsTable.columnFields(0) = "year"
+    EligDonorsFDsTable.filters(0).columnName = "CmsEligible"
+    EligDonorsFDsTable.filters(0).values(0) = "1"
+    EligDonorsFDsTable.filters(1).columnName = "Outcome_Outcome"
+    EligDonorsFDsTable.filters(1).values(0) = "Donor"
+    EligDonorsFDsTable.filters(1).values(1) = "Family Decline"
+    
+    Dim PC1stAppTable As pivotTableInfo
+    PC1stAppTable.sheetName = "Approaches - 1st PC"
+    PC1stAppTable.tableName = "Approaches - 1st PC Table"
+    PC1stAppTable.dataField = "authorizationbydonordesignation"
+    PC1stAppTable.columnFields(0) = "year"
+    PC1stAppTable.filters(0).columnName = "Outcome_Outcome"
+    PC1stAppTable.filters(0).values(0) = "Donor"
+    PC1stAppTable.filters(0).values(1) = "Family Decline"
+    PC1stAppTable.filters(0).values(2) = "CNR"
+    PC1stAppTable.filters(0).values(3) = "ME Decline"
+    
+    Dim PC1stDonorTable As pivotTableInfo
+    PC1stDonorTable.sheetName = "Donors - 1st PC"
+    PC1stDonorTable.tableName = "Donors - 1st PC Table"
+    PC1stDonorTable.dataField = "authorizationbydonordesignation"
+    PC1stDonorTable.columnFields(0) = "year"
+    PC1stDonorTable.filters(0).columnName = "Outcome_Outcome"
+    PC1stDonorTable.filters(0).values(0) = "Donor"
+    
+    Dim PC1stDonorByRaceTable As pivotTableInfo
+    PC1stDonorByRaceTable.sheetName = "Donors - 1st PC by Race"
+    PC1stDonorByRaceTable.tableName = "Donors - 1st PC by Race Table"
+    PC1stDonorByRaceTable.dataField = "authorizationbydonordesignation"
+    PC1stDonorByRaceTable.rowFields(0) = "R"
+    PC1stDonorByRaceTable.columnFields(0) = "year"
+    PC1stDonorByRaceTable.filters(0).columnName = "Outcome_Outcome"
+    PC1stDonorByRaceTable.filters(0).values(0) = "Donor"
+    
+    Dim TopDonorHospTable As pivotTableInfo
+    TopDonorHospTable.sheetName = "Top Donor Hospitals"
+    TopDonorHospTable.tableName = "Top Donor Hospitals Table"
+    TopDonorHospTable.dataField = "Hospital"
+    TopDonorHospTable.columnFields(0) = "year"
+    TopDonorHospTable.filters(0).columnName = "year"
+    TopDonorHospTable.filters(0).values(0) = "2013"
+    TopDonorHospTable.filters(1).columnName = "Outcome_Outcome"
+    TopDonorHospTable.filters(1).values(0) = "Donor"
+
     Dim pi As pivotInfo
     pi.dataSheetName = "CLEAN_REFERRALS"
     pi.tables(0) = consentTable
@@ -340,7 +458,42 @@ Public Sub Main()
     pi.tables(6) = codTable
     pi.tables(7) = ageTable
     pi.tables(8) = consentAgeByTeamTable
-    
+    pi.tables(9) = consentMSRTable
+    pi.tables(10) = donationMSRTable
+    pi.tables(11) = codMSRTable
+    pi.tables(12) = codMSRByTeamTable
+    pi.tables(13) = codByTeamTable
+    pi.tables(14) = consentAgeTable
+    pi.tables(15) = donationAgeTable
+    pi.tables(16) = consentRaceTable
+    pi.tables(17) = donationRaceTable
+    pi.tables(18) = consentAgeRaceTable
+    pi.tables(19) = donationAgeRaceTable
+    pi.tables(20) = consentTeamTable
+    pi.tables(21) = consentTeamQtrTable
+    pi.tables(22) = consentRaceByTeamTable
+    pi.tables(23) = consentAgeByTeamTable
+    pi.tables(24) = donationTeamTable
+    pi.tables(25) = donationTeamQtrTable
+    pi.tables(26) = donationRaceByTeamTable
+    pi.tables(27) = donationAgeByTeamTable
+    pi.tables(28) = consentCODByTeamTable
+    pi.tables(29) = donationCODByTeamTable
+    pi.tables(30) = consentCODTable
+    pi.tables(31) = donationCODTable
+    pi.tables(32) = CMSEligTable
+    pi.tables(33) = consentCMSEligTable
+    pi.tables(34) = consentCMSEligByTeamTable
+    pi.tables(35) = donationCMSEligTable
+    pi.tables(36) = donationCMSEligByTeamTable
+    pi.tables(37) = DonorsQtrByTeamTable
+    pi.tables(38) = DonorTypeTable
+    pi.tables(39) = EligDonorsFDsTable
+    pi.tables(40) = PC1stAppTable
+    pi.tables(41) = PC1stDonorTable
+    pi.tables(42) = PC1stDonorByRaceTable
+    pi.tables(43) = TopDonorHospTable
+        
     'Just a NOTE: Instead of creating tables above as we did, we could have also do all in one step as follows:
     ' ex. for consent table
     ' pivotInfo.tables(0).sheetName = "NYODN Consent Rates"
@@ -352,16 +505,18 @@ Public Sub Main()
     
     CleanWorkbook
     
+    Dim i As Integer
+    
     For i = 0 To UBound(pi.tables)
         On Error GoTo failedPivot
         If Not pi.tables(i).sheetName = "" Then
-            CreatePivotTable pi.dataSheetName, pi.tables(i)
+            CreatePivotTable i, pi.dataSheetName, pi.tables(i)
         Else
             Exit For
         End If
 failedPivot:
         If Not Err.Description = "" Then
-            MsgBox pi.tables(i).sheetName & Err.Description
+            MsgBox pi.tables(i).sheetName & ": " & Err.Description
         End If
     Next i
     
@@ -555,8 +710,7 @@ Private Sub Serialize(pi As pivotInfo)
 
 End Sub
 
-Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
-
+Private Sub CreatePivotTable(index As Integer, dataSheetName As String, pt As pivotTableInfo)
 
     ' First create the sheet where the pivot table
     ' will live (if it doesn't already exists)
@@ -564,7 +718,7 @@ Private Sub CreatePivotTable(dataSheetName As String, pt As pivotTableInfo)
     Dim sName As String
     Dim sheetToUse As Worksheet
     
-    sName = Strings.Left(pt.sheetName, 20) & " AutoGen"
+    sName = index & ". " & Strings.Left(pt.sheetName, 20) & " " & SheetNameSuffix
     
     If Not SheetExists(sName) Then
         Worksheets.Add().Name = sName
