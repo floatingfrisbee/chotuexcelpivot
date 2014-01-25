@@ -403,8 +403,8 @@ Public Sub Main()
     DonorsQtrByTeamTable.filters(0).values(0) = "Donor"
     
     Dim DonorTypeTable As pivotTableInfo
-    DonorTypeTable.sheetName = "Donors by Type"
-    DonorTypeTable.tableName = "Donors by Type Table"
+    DonorTypeTable.sheetName = "CMS Additional Donors"
+    DonorTypeTable.tableName = "CMS Additional Donors Table"
     DonorTypeTable.dataField = "Outcome_Outcome"
     DonorTypeTable.columnFields(0) = "year"
     DonorTypeTable.columnFields(1) = "Outcome_Detail"
@@ -418,9 +418,9 @@ Public Sub Main()
     EligDonorsFDsTable.columnFields(0) = "year"
     EligDonorsFDsTable.filters(0).columnName = "CmsEligible"
     EligDonorsFDsTable.filters(0).values(0) = "1"
-    EligDonorsFDsTable.filters(1).columnName = "Outcome_Outcome"
-    EligDonorsFDsTable.filters(1).values(0) = "Donor"
-    EligDonorsFDsTable.filters(1).values(1) = "Family Decline"
+    'EligDonorsFDsTable.filters(1).columnName = "Outcome_Outcome"
+    'EligDonorsFDsTable.filters(1).values(0) = "Donor"
+    'EligDonorsFDsTable.filters(1).values(1) = "Family Decline"
     
     Dim PC1stAppTable As pivotTableInfo
     PC1stAppTable.sheetName = "Approaches - 1st PC"
@@ -432,6 +432,18 @@ Public Sub Main()
     PC1stAppTable.filters(0).values(1) = "Family Decline"
     PC1stAppTable.filters(0).values(2) = "CNR"
     PC1stAppTable.filters(0).values(3) = "ME Decline"
+    
+    Dim PC1stAppByRaceTable As pivotTableInfo
+    PC1stAppByRaceTable.sheetName = "Approaches - 1st PC By Race"
+    PC1stAppByRaceTable.tableName = "Approaches - 1st PC By Race Table"
+    PC1stAppByRaceTable.dataField = "authorizationbydonordesignation"
+    PC1stAppByRaceTable.rowFields(0) = "R"
+    PC1stAppByRaceTable.columnFields(0) = "year"
+    PC1stAppByRaceTable.filters(0).columnName = "Outcome_Outcome"
+    PC1stAppByRaceTable.filters(0).values(0) = "Donor"
+    PC1stAppByRaceTable.filters(0).values(1) = "Family Decline"
+    PC1stAppByRaceTable.filters(0).values(2) = "CNR"
+    PC1stAppByRaceTable.filters(0).values(3) = "ME Decline"
     
     Dim PC1stDonorTable As pivotTableInfo
     PC1stDonorTable.sheetName = "Donors - 1st PC"
@@ -504,9 +516,10 @@ Public Sub Main()
     pi.tables(38) = DonorTypeTable
     pi.tables(39) = EligDonorsFDsTable
     pi.tables(40) = PC1stAppTable
-    pi.tables(41) = PC1stDonorTable
-    pi.tables(42) = PC1stDonorByRaceTable
-    pi.tables(43) = TopDonorHospTable
+    pi.tables(41) = PC1stAppByRaceTable
+    pi.tables(42) = PC1stDonorTable
+    pi.tables(43) = PC1stDonorByRaceTable
+    pi.tables(44) = TopDonorHospTable
         
     'Just a NOTE: Instead of creating tables above as we did, we could have also do all in one step as follows:
     ' ex. for consent table
@@ -592,9 +605,13 @@ Private Sub CreatePivotTable(index As Integer, pCache As PivotCache, pt As pivot
     ActiveSheet.PivotTables(pt.tableName).AddDataField ActiveSheet.PivotTables( _
         pt.tableName).PivotFields(pt.dataField), "Count", xlCount
     
+    Dim percentColumnName
+    
+    percentColumnName = "%"
+    
     ' Add data field for percent
     ActiveSheet.PivotTables(pt.tableName).AddDataField ActiveSheet.PivotTables( _
-        pt.tableName).PivotFields(pt.dataField), "Percent", xlCount
+        pt.tableName).PivotFields(pt.dataField), percentColumnName, xlCount
     
     ' Make the first data field count based
     With ActiveSheet.PivotTables(pt.tableName).DataPivotField
@@ -603,8 +620,8 @@ Private Sub CreatePivotTable(index As Integer, pCache As PivotCache, pt As pivot
     End With
     
     ' Make the second data field percent based
-    With ActiveSheet.PivotTables(pt.tableName).PivotFields("Percent")
-        .Calculation = xlPercentOfColumn
+    With ActiveSheet.PivotTables(pt.tableName).PivotFields(percentColumnName)
+        .Calculation = xlPercentOfParentRow
         .NumberFormat = "0%"
     End With
     
@@ -851,3 +868,4 @@ Private Sub Serialize(pi As pivotInfo)
     Set oFile = Nothing
 
 End Sub
+
