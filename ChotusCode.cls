@@ -7,8 +7,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
-
-
 Private Const SheetNameSuffix = "AG"
 
 Private Type filterInfo
@@ -597,11 +595,22 @@ Private Sub CreatePivotTable(index As Integer, pCache As PivotCache, pt As pivot
     
     Set pTable = ActiveSheet.PivotTables(pt.tableName)
 
+    Dim posCounter
+    
+    posCounter = 1
+
     ' Add column fields
-    With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.columnFields(0))
-        .Orientation = xlColumnField
-        .Position = 1
-    End With
+    For i = 0 To UBound(pt.columnFields)
+        If Not pt.columnFields(i) = "" Then
+            With ActiveSheet.PivotTables(pt.tableName).PivotFields(pt.columnFields(i))
+                .Orientation = xlColumnField
+                .Position = posCounter
+            End With
+            posCounter = posCounter + 1
+        Else
+            Exit For
+        End If
+    Next i
         
     ' Add data field for count
     ActiveSheet.PivotTables(pt.tableName).AddDataField ActiveSheet.PivotTables( _
@@ -626,8 +635,6 @@ Private Sub CreatePivotTable(index As Integer, pCache As PivotCache, pt As pivot
         .Calculation = xlPercentOfParentRow
         .NumberFormat = "0%"
     End With
-    
-    Dim posCounter
     
     posCounter = 1
     
